@@ -1,0 +1,51 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<h1>{{listing.title}}</h1>
+
+<p>{{listing.description}}</p>
+<p>{{listing.start_bid}}</p>
+<p>{{listing.category}}</p>
+
+{% for bid in biddings %}
+<p> {{bid.amount}} bid by <b>{{bid.created_by}}</b></p>
+
+{% empty %}
+<p> No active listings. </p>
+<p> Startbid: <b>{{listing.start_bid}}</b>
+{% endfor %}
+
+{% if listing.auction_open %}
+<form action = "{% url 'listing' listing.id %}" method = "post">
+	{% csrf_token %}
+	{{bidform.as_p}}
+	<input type="submit" value="Create bidding">
+</form>
+{% endif %}
+
+{% if isCreator and listing.auction_open%}
+<form action = "{% url 'listing' listing.id %}" method = "post">
+	{% csrf_token %}
+	<input type="submit" value="Close auction" name="closing">
+</form>
+
+{% elif not listing.auction_open and winner%}
+<h3>Congratulations! You've won!</h3>
+{% endif %}
+
+{% for comment in comments %}
+<p><i>{{comment.comment}}</i> by: <b><i>{{comment.posted_by}}</i></b></p>
+{%endfor %}
+
+{% if user.is_authenticated %}
+<form action = "{% url 'listing' listing.id %}" method = "post">
+	{% csrf_token %}
+	{{commentform.as_p}}
+	<input type="submit" value="post comment" name="commenting">
+</form>
+
+{% endif %}
+
+
+{% endblock %}

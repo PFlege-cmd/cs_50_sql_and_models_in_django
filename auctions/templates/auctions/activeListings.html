@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h1> Listings </h1>
+	<ul>
+	{% for listing in listings %}
+	{% if user.is_authenticated %}
+		<li><a href="{% url 'listing' listing.listing.id%}">Title: {{listing.listing}}, currently highest: {{listing.amount}}, bid by {{listing.bidder}}</a></li>
+	{% else %}
+		<li>{{listing}}</li>
+	{% endif %}
+	{% if listing.listing.image %}
+		<img src="{{listing.listing.image.url}}" alt="f">
+	{% endif %}
+	{% empty %}
+		<li>Nothing to show</li>
+	{%endfor%}
+	</ul>
+
+{% endblock %}
