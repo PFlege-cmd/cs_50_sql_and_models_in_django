@@ -11,6 +11,8 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("active_listings", views.show_listings, name="active_listings"),
     path("create_listings", views.create_listing, name="create_listings"),
+    path("watch_list", views.watchlist, name = "watchlist"),
+    path("categories", views.get_categories, name = "categories"),
     re_path(r"listings/(?P<site>[\w]+)$", views.show_one_listing, name = "listing")
 ]
 

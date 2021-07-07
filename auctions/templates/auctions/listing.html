@@ -24,6 +24,22 @@
 </form>
 {% endif %}
 
+
+{% if user.is_authenticated and not isOnWatchlist%}
+<form action = "{% url 'listing' listing.id %}" method = "post">
+	{% csrf_token %}
+	<input type="submit" value="Add to Watchlist" name="watchlist">
+</form>
+{% elif user.is_authenticated and isOnWatchlist%}	
+<form action = "{% url 'listing' listing.id %}" method = "post">
+	{% csrf_token %}
+	<input type="submit" value="Remove from Watchlist" name="remove">
+</form>
+
+{% endif %}
+
+
+
 {% if isCreator and listing.auction_open%}
 <form action = "{% url 'listing' listing.id %}" method = "post">
 	{% csrf_token %}
@@ -34,6 +50,7 @@
 <h3>Congratulations! You've won!</h3>
 {% endif %}
 
+<div>
 {% for comment in comments %}
 <p><i>{{comment.comment}}</i> by: <b><i>{{comment.posted_by}}</i></b></p>
 {%endfor %}
@@ -46,6 +63,6 @@
 </form>
 
 {% endif %}
-
+</div>
 
 {% endblock %}

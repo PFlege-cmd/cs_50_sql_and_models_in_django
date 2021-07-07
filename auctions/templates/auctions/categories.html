@@ -1,0 +1,21 @@
+
+{% extends "auctions/layout.html" %}
+{% load index %}
+{% load static %}
+
+
+{% block body %}
+<table>
+<h2><i>Choose a category to filter listings: </i></h2>
+{% for category in categories %}
+<tr>
+	<td>
+		<div>
+			<form action="{% url 'active_listings' %}" method="get">
+			<input type="submit" name="enums" value="{{category|index:0}}" class="enums">
+		</div>
+	</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

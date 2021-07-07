@@ -5,9 +5,17 @@
 	<ul>
 	{% for listing in listings %}
 	{% if user.is_authenticated %}
-		<li><a href="{% url 'listing' listing.listing.id%}">Title: {{listing.listing}}, currently highest: {{listing.amount}}, bid by {{listing.bidder}}</a></li>
+	<div style ="border: 1px solid black; border-collapse: collapse;">
+		<dl><a href="{% url 'listing' listing.listing.id%}">Title: {{listing.listing.title}}</a></dl>
+		<dl>currently highest: {{listing.amount}}</dl>
+		<dl>bid by {{listing.bidder}}</dl>
+	</div>
 	{% else %}
-		<li>{{listing}}</li>
+	<div style ="border: 1px solid black; border-collapse: collapse;">
+		<dl>Title: {{listing.listing.title}}</dl>
+		<dl>currently highest: {{listing.amount}}</dl>
+		<dl>bid by {{listing.bidder}}</dl>
+	</div>
 	{% endif %}
 	{% if listing.listing.image %}
 		<img src="{{listing.listing.image.url}}" alt="f">

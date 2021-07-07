@@ -71,7 +71,15 @@ def create_listing(request):
 
 # 'Active Listings' page
 def show_listings(request):
-    if request.method == "POST":
+    if request.method == "GET" and "enums" in request.GET:
+        #print(Listing.objects.filter(category = request.GET["enums"]))
+        #return HttpResponse(request.GET["enums"])
+        bids_for_listing = get_highest_bid_for_listing(Listing.objects.filter(category = request.GET["enums"]))
+        return render(request, 'auctions/activeListings.html',{
+            "listings" : bids_for_listing
+            })
+    
+    elif request.method == "POST":
         listingForm = ListingForm(request.POST,request.FILES)
         if listingForm.is_valid():
             
@@ -88,9 +96,9 @@ def show_listings(request):
             return HttpResponseRedirect(reverse("active_listings"))
         else:
             return HttpResponse(listingForm.errors)
-    else:        
-        print(get_highest_bid_for_listing())
-        bids_for_listing = get_highest_bid_for_listing()
+    elif request.method == "GET":        
+        print(get_highest_bid_for_listing(Listing.objects.all()))
+        bids_for_listing = get_highest_bid_for_listing(Listing.objects.all())
         return render(request, 'auctions/activeListings.html',{
             "listings" : bids_for_listing
     })
@@ -105,15 +113,19 @@ def show_one_listing(request, **listing):
     # simply gets homepage
     if request.method == "GET":     
         comments = cur_listing.comments.all()
-        print(comments)
+        isOnWatchlist = False
+        if cur_listing in request.user.watch_list.all():
+            isOnWatchlist = True
+
         return render(request, 'auctions/listing.html', {
             "biddings": cur_biddings,
             "listing": cur_listing, 
             "bidform" : BidForm(),
             "commentform" : CommentForm(),
             "isCreator": isCreator,
+            "isOnWatchlist" : isOnWatchlist,
             "winner" : get_winner(cur_biddings)==request.user,
-            "comments" : comments
+            "comments" : comments            
         })
         
     # closes current auction by setting boolean-field in listing-instance to 'false'
@@ -129,6 +141,14 @@ def show_one_listing(request, **listing):
             cur_comment = Comments(comment = commentForm.cleaned_data["comment"], auction_item = cur_listing, posted_by = request.user)
             cur_comment.save()
             return HttpResponseRedirect(reverse("listing", args=(pathList[len(pathList) - 1],)))
+            
+    elif request.method == "POST" and "watchlist" in request.POST:
+        request.user.watch_list.add(cur_listing)
+        return HttpResponseRedirect(reverse("watchlist"))
+        
+    elif request.method == "POST" and "remove" in request.POST:
+        request.user.watch_list.remove(cur_listing)
+        return HttpResponseRedirect(reverse("watchlist"))
     
     # posts listing and saves it to DB
     elif request.method == "POST":
@@ -154,11 +174,20 @@ def is_current_user_creator(request, creator):
 def watchlist(request):
     user_list = User.objects.all()
     
-    if request.method == "GET":
-        return HttpResponse("Under Construction")
+    if request.method == "GET":        
+        return render(request, 'auctions/watchlist.html', {
+            "watchlist_items" : request.user.watch_list.all()
+        })
         
+    if request.method == "POST":
+        
+        return HttpResponse("POST Under Construction") 
+
+def get_categories(request):
     
-    
+    return render(request, 'auctions/categories.html', {
+        "categories" : Listing.CATEGORY
+    })
 
 # Gets the winner of an auction if it is closed
 def get_winner(biddings):
@@ -191,12 +220,12 @@ def get_highest_offer(biddings):
     return current_highest_offer
 
 # gets a dictionary for all listings and its associated highest bidding and bidder.
-def get_highest_bid_for_listing():
+def get_highest_bid_for_listing(desired_listings):
 
-    all_listings = Listing.objects.all()
+    listings = desired_listings #Listing.objects.all()
     listing_bid_bidder = []
     
-    for listing in all_listings:
+    for listing in listings:
         bid_data = get_highest_offer(listing.bids.all().order_by("amount"))
         bid_data["listing"] = listing
         listing_bid_bidder.append(bid_data)
